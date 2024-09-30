@@ -26,7 +26,7 @@ export default function ContentArea() {
             position={'relative'}
         >
             <Box height={'100%'} width={'100%'} px={8} pt={8} overflow={'hidden'}>
-                <TextArea overflow={'hidden'}>
+                <TextArea overflow={'hidden auto'}>
                     <p>
                         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras sagittis,
                         augue in fringilla mollis, nibh ipsum auctor magna, sit amet elementum

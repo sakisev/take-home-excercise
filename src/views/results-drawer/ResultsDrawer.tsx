@@ -1,5 +1,5 @@
 import ResultLoader from '@/components/loaders/ResultLoader';
-import { Drawer, Skeleton, Stack, styled } from '@mui/material';
+import { Drawer, Skeleton, Stack, styled, Typography } from '@mui/material';
 
 const StyledDrawer = styled(Drawer)(() => ({
     width: 500,
@@ -13,6 +13,8 @@ export default function ResultsDrawer() {
 
     return (
         <StyledDrawer variant={'persistent'} anchor={'right'} open>
+            For safekeeping:
+            <Typography variant={'h4'}>articles published after 2015 with exactly 100 citations</Typography>
             <Stack gap={2} p={2}>
                 <Skeleton variant={'rounded'} height={30} width={'100%'} />
                 <Stack direction={'row'} gap={2}>

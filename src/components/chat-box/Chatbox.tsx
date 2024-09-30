@@ -1,16 +1,9 @@
+import generateChatResponse from '@/api/generateChatResponse';
+import GeneratedMessage from '@/components/chat-box/GeneratedMessage';
+import UserMessage from '@/components/chat-box/UserMessage';
 import useChatStore from '@/store';
 import { ChatBubbleOutlineRounded, ChevronLeft, Close, Send } from '@mui/icons-material';
-import {
-    Fab,
-    IconButton,
-    InputAdornment,
-    Popover,
-    Skeleton,
-    Stack,
-    styled,
-    TextField,
-    Typography,
-} from '@mui/material';
+import { alpha, Fab, IconButton, InputAdornment, Popover, Stack, styled, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
 
 const StyledPopover = styled(Popover)(({ theme }) => ({
@@ -40,18 +33,61 @@ const StyledPopover = styled(Popover)(({ theme }) => ({
             width: '100%',
             flexGrow: 1,
             overflowY: 'auto',
-            alignItems: 'flex-start',
             justifyContent: 'flex-start',
-            '> .Chtbx-Body-User': {
-                alignSelf: 'flex-end',
+            gap: theme.spacing(3),
+
+            '.Chtbx-Body-Message': {
+                alignItems: 'flex-start',
+                maxWidth: '90%',
+                borderRadius: 5,
+                padding: theme.spacing(2),
+
+                '> .Chtbx-Body-Message-User': {
+                    boxShadow: theme.shadows['1'],
+                },
+                ' .Chtbx-Body-Message-Assistant-Text': {
+                    padding: theme.spacing(2),
+                    borderRadius: 5,
+                    boxShadow: theme.shadows['1'],
+                },
+                '> .Chtbx-Body-Message-Assistant-ResultCard': {
+                    width: '100%',
+
+                    '> .MuiCardHeader-root, > .MuiCardContent-root, > .MuiCardActions-root': {
+                        padding: `${theme.spacing(2)} !important`,
+                    },
+                    '> .MuiCardContent-root': {
+                        paddingBottom: 0,
+                        marginBottom: 0,
+                    },
+                },
+                '&-User': {
+                    alignSelf: 'flex-end',
+                    backgroundColor: theme.palette.primary.main,
+                    color: theme.palette.common.white,
+                },
             },
         },
         '> .Chtbx-Actions': {
             padding: theme.spacing(4),
             '> .Chtbx-Actions-TextField': {
+                '.Chtbx-Actions-Input-Adornment': {
+                    cursor: 'pointer',
+                    padding: theme.spacing(1),
+                    borderRadius: '50%',
+                    '&:hover': {
+                        backgroundColor: alpha(theme.palette.action.hover, theme.palette.action.hoverOpacity),
+                    },
+                    '&:active': {
+                        backgroundColor: alpha(theme.palette.action.active, theme.palette.action.activatedOpacity),
+                    },
+                },
                 '&:has(> .Mui-disabled)': {
-                    '.Chtbx-Actions-Input-SendIcon': {
-                        color: theme.palette.action.disabled,
+                    '.Chtbx-Actions-Input-Adornment': {
+                        pointerEvents: 'none',
+                        svg: {
+                            color: theme.palette.action.disabled,
+                        },
                     },
                 },
             },
@@ -67,8 +103,29 @@ const StyledFab = styled(Fab)(({ theme }) => ({
 }));
 
 export default function Chatbox() {
-    const { toggleChatbox, isChatboxOpen } = useChatStore();
+    const { toggleChatbox, isChatboxOpen, messages } = useChatStore();
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+    const [userInput, setUserInput] = useState<string | ''>('');
+
+    const submitUserInput = async () => {
+        messages.push({ text: userInput, role: 'user' });
+        const response = await generateChatResponse(userInput);
+        setUserInput('');
+        if (response) {
+            messages.push({ ...response, role: 'assistant' });
+        }
+    };
+
+    const submitOnEnter = (event: React.KeyboardEvent<HTMLDivElement>) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            return submitUserInput();
+        }
+    };
+
+    const handleUserInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setUserInput(e.target.value);
+    };
 
     const handleChatboxToggle = (e: React.MouseEvent<HTMLButtonElement>) => {
         setAnchorEl(e.currentTarget);
@@ -100,37 +157,40 @@ export default function Chatbox() {
                     </IconButton>
                 </Stack>
                 <Stack className={'Chtbx-Body'}>
-                    <Skeleton className={'Chtbx-Body-GPT'} height={64} width={150} />
-                    <Skeleton className={'Chtbx-Body-GPT'} height={64} width={150} />
-                    <Skeleton className={'Chtbx-Body-User'} height={64} width={150} />
-                    <Skeleton className={'Chtbx-Body-GPT'} height={64} width={150} />
-                    <Skeleton className={'Chtbx-Body-User'} height={64} width={150} />
-                    <Skeleton className={'Chtbx-Body-GPT'} height={64} width={150} />
-                    <Skeleton className={'Chtbx-Body-User'} height={64} width={150} />
-                    <Skeleton className={'Chtbx-Body-GPT'} height={64} width={150} />
-                    <Skeleton className={'Chtbx-Body-User'} height={64} width={150} />
-                    <Skeleton className={'Chtbx-Body-GPT'} height={64} width={150} />
-                    <Skeleton className={'Chtbx-Body-GPT'} height={64} width={150} />
-                    <Skeleton className={'Chtbx-Body-GPT'} height={64} width={150} />
-                    <Skeleton className={'Chtbx-Body-GPT'} height={64} width={150} />
-                    <Skeleton className={'Chtbx-Body-GPT'} height={64} width={150} />
+                    {messages.map((message, index) => {
+                        switch (message.role) {
+                            case 'user':
+                                return <UserMessage key={index} message={message} />;
+                            case 'assistant':
+                                return <GeneratedMessage key={index} message={message} />;
+                        }
+                    })}
                 </Stack>
                 <Stack className={'Chtbx-Actions'} direction={'row'}>
                     <TextField
                         className={'Chtbx-Actions-TextField'}
                         size={'small'}
                         variant={'outlined'}
+                        placeholder={'Artificial intelligence articles published after 2015 with exactly 100 citations'}
                         fullWidth
                         multiline
+                        onChange={handleUserInput}
+                        value={userInput}
+                        onKeyDown={submitOnEnter}
                         maxRows={5}
                         slotProps={{
                             input: {
                                 className: 'Chtbx-Actions-Input',
                                 endAdornment: (
-                                    <InputAdornment position='end'>
+                                    <InputAdornment
+                                        className={'Chtbx-Actions-Input-Adornment'}
+                                        position='end'
+                                        onClick={submitUserInput}
+                                    >
                                         <Send
                                             className={'Chtbx-Actions-Input-SendIcon'}
                                             color={'primary'}
+                                            fontSize={'small'}
                                         />
                                     </InputAdornment>
                                 ),

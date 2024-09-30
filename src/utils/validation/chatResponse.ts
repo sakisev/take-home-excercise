@@ -1,7 +1,7 @@
-import * as zod from 'zod';
+import * as GeneralZod from 'zod';
 
-export const chatResponseSchema = zod.object({
-    title: zod.string().min(1),
-    url: zod.string().url(),
-    match: zod.boolean()
+export const chatResponseSchema = GeneralZod.object({
+    title: GeneralZod.string().min(1),
+    url: GeneralZod.string().url(),
+    match: GeneralZod.boolean(),
 });

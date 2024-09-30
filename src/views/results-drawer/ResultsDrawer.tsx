@@ -1,20 +1,32 @@
+import ResultCard from '@/components/chat-box/ResultCard.tsx';
 import ResultLoader from '@/components/loaders/ResultLoader';
-import { Drawer, Skeleton, Stack, styled, Typography } from '@mui/material';
+import useChatStore from '@/store';
+import { Drawer, List, ListItem, Skeleton, Stack, styled } from '@mui/material';
 
 const StyledDrawer = styled(Drawer)(() => ({
     width: 500,
     '> .MuiPaper-root': {
         width: 500,
+        display: 'flex',
+        flexDirection: 'column',
+        flexGrow: 1,
+        overflow: 'hidden',
+        '.Results-Container': {
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden auto',
+            width: '100%',
+        },
     },
 }));
 
-export default function ResultsDrawer() {
-    const results = new Array(5).fill(1);
+const loaders = new Array(5).fill(1);
 
+export default function ResultsDrawer() {
+    const { showInResultsPanel, oaResponse } = useChatStore();
+    const results = oaResponse && oaResponse.results.length > 0 ? oaResponse.results : [];
     return (
         <StyledDrawer variant={'persistent'} anchor={'right'} open>
-            For safekeeping:
-            <Typography variant={'h4'}>articles published after 2015 with exactly 100 citations</Typography>
             <Stack gap={2} p={2}>
                 <Skeleton variant={'rounded'} height={30} width={'100%'} />
                 <Stack direction={'row'} gap={2}>
@@ -42,11 +54,19 @@ export default function ResultsDrawer() {
                     <Skeleton variant={'text'} height={20} width={64} />
                 </Stack>
             </Stack>
-            <Stack gap={4} p={2} mt={2} overflow={'hidden auto'}>
-                {results.map((_, index) => (
-                    <ResultLoader key={index} />
-                ))}
-            </Stack>
+            <List className={'Results-Container'}>
+                {showInResultsPanel && results.length
+                    ? results.map((result, index) => (
+                          <ListItem key={index}>
+                              <ResultCard oaResult={result} />
+                          </ListItem>
+                      ))
+                    : loaders.map((_, index) => (
+                          <ListItem key={index}>
+                              <ResultLoader key={index} />
+                          </ListItem>
+                      ))}
+            </List>
         </StyledDrawer>
     );
 }

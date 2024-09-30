@@ -1,5 +1,4 @@
 import openAI from '@/api/open-ai';
-import fetchWorks from '@/api/open-alex';
 import { GeneratedResponse } from '@/utils/types/generatedResponse';
 import { chatResponseSchema } from '@/utils/validation/chatResponse.ts';
 import OpenAI from 'openai';
@@ -36,21 +35,16 @@ const generateChatResponse = async (userInput: string): Promise<GeneratedRespons
         if (!parsedJson) {
             return response;
         }
+
         if (!parsedJson.match) {
             return {
                 text: parsedJson.title,
             };
         }
 
-        const openAlexResponse = await fetchWorks(parsedJson.url);
-        if (!openAlexResponse) {
-            return response;
-        }
-
         return {
             url: parsedJson.url,
             text: parsedJson.title,
-            oaResponse: openAlexResponse,
         };
     } catch (e: unknown) {
         console.error(e);
@@ -59,14 +53,19 @@ const generateChatResponse = async (userInput: string): Promise<GeneratedRespons
 };
 
 const isChatResponseValid = (chatResponse: ChatCompletion) => {
-    const message = chatResponse.choices[0].message.content;
+    try {
+        const message = chatResponse.choices[0].message.content;
 
-    if (!message) {
-        return;
+        if (!message) {
+            return;
+        }
+        const parsedJson = JSON.parse(message);
+
+        return chatResponseSchema.parse(parsedJson);
+    } catch (e: unknown) {
+        console.error(e);
+        return false;
     }
-    const parsedJson = JSON.parse(message);
-
-    return chatResponseSchema.parse(parsedJson);
 };
 
 export default generateChatResponse;

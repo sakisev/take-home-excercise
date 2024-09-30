@@ -1,7 +1,8 @@
-import generateChatResponse from '@/api/generateChatResponse';
+import generateChatResponse from '@/api/open-ai/generateChatResponse';
+import fetchWorks from '@/api/open-alex';
 import GeneratedMessage from '@/components/chat-box/GeneratedMessage';
 import UserMessage from '@/components/chat-box/UserMessage';
-import useChatStore from '@/store';
+import useChatStore, { Message } from '@/store';
 import { ChatBubbleOutlineRounded, ChevronLeft, Close, Send } from '@mui/icons-material';
 import { alpha, Fab, IconButton, InputAdornment, Popover, Stack, styled, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
@@ -49,17 +50,6 @@ const StyledPopover = styled(Popover)(({ theme }) => ({
                     padding: theme.spacing(2),
                     borderRadius: 5,
                     boxShadow: theme.shadows['1'],
-                },
-                '> .Chtbx-Body-Message-Assistant-ResultCard': {
-                    width: '100%',
-
-                    '> .MuiCardHeader-root, > .MuiCardContent-root, > .MuiCardActions-root': {
-                        padding: `${theme.spacing(2)} !important`,
-                    },
-                    '> .MuiCardContent-root': {
-                        paddingBottom: 0,
-                        marginBottom: 0,
-                    },
                 },
                 '&-User': {
                     alignSelf: 'flex-end',
@@ -109,10 +99,19 @@ export default function Chatbox() {
 
     const submitUserInput = async () => {
         messages.push({ text: userInput, role: 'user' });
-        const response = await generateChatResponse(userInput);
+        const input = userInput;
         setUserInput('');
+        const response = await generateChatResponse(input);
+
         if (response) {
             messages.push({ ...response, role: 'assistant' });
+
+            if (response.url) {
+                const openAlexResponse = await fetchWorks(response.url);
+                if (!openAlexResponse) {
+                    return response;
+                }
+            }
         }
     };
 
@@ -130,6 +129,15 @@ export default function Chatbox() {
     const handleChatboxToggle = (e: React.MouseEvent<HTMLButtonElement>) => {
         setAnchorEl(e.currentTarget);
         toggleChatbox();
+    };
+
+    const RenderMessageItem = ({ message }: { message: Message }) => {
+        switch (message.role) {
+            case 'user':
+                return <UserMessage message={message} />;
+            case 'assistant':
+                return <GeneratedMessage message={message} />;
+        }
     };
 
     return (
@@ -157,14 +165,9 @@ export default function Chatbox() {
                     </IconButton>
                 </Stack>
                 <Stack className={'Chtbx-Body'}>
-                    {messages.map((message, index) => {
-                        switch (message.role) {
-                            case 'user':
-                                return <UserMessage key={index} message={message} />;
-                            case 'assistant':
-                                return <GeneratedMessage key={index} message={message} />;
-                        }
-                    })}
+                    {messages.map((message, index) => (
+                        <RenderMessageItem key={index} message={message} />
+                    ))}
                 </Stack>
                 <Stack className={'Chtbx-Actions'} direction={'row'}>
                     <TextField

@@ -122,7 +122,7 @@ export interface CitedByPercentileYear {
     max: number;
 }
 
-export interface Results {
+export interface Result {
     id: string;
     doi: string;
     title: string;
@@ -209,13 +209,6 @@ export interface CountByYear {
 
 export interface OpenAlexWorkResponse {
     meta: Meta;
-    results: Results[];
+    results: Result[];
     group_by: string[];
-}
-
-export interface FetchWorksFilters {
-    publication_year: string;
-    'default.search': string;
-    is_oa: string;
-    cited_by_count: string;
 }

@@ -1,10 +1,22 @@
-import { Results } from '@/utils/types/openAlex.ts';
+import { Result } from '@/utils/types/openAlex.ts';
 import { FileCopy } from '@mui/icons-material';
-import { Button, Card, CardActions, CardContent, Stack, Typography } from '@mui/material';
+import { Button, Card, CardActions, CardContent, Stack, styled, Typography } from '@mui/material';
 
 interface ResultCardProps {
-    oaResult: Results;
+    oaResult: Result;
 }
+
+const StyledCard = styled(Card)(({ theme }) => ({
+    width: '100%',
+
+    '> .MuiCardHeader-root, > .MuiCardContent-root, > .MuiCardActions-root': {
+        padding: `${theme.spacing(2)} !important`,
+    },
+    '> .MuiCardContent-root': {
+        paddingBottom: 0,
+        marginBottom: 0,
+    },
+}));
 
 export default function ResultCard({ oaResult }: ResultCardProps) {
     const authors =
@@ -16,7 +28,7 @@ export default function ResultCard({ oaResult }: ResultCardProps) {
 
     const isOpenAccess = oaResult.open_access.is_oa && oaResult.open_access.oa_url;
     return (
-        <Card className={'Chtbx-Body-Message-Assistant-ResultCard'} key={oaResult.id}>
+        <StyledCard className={'ResultCard'} key={oaResult.id}>
             <CardContent>
                 <Stack direction={'row'} gap={2} alignItems={'center'}>
                     <FileCopy fontSize={'inherit'} color={'primary'} />
@@ -44,6 +56,6 @@ export default function ResultCard({ oaResult }: ResultCardProps) {
                     </Button>
                 </CardActions>
             )}
-        </Card>
+        </StyledCard>
     );
 }

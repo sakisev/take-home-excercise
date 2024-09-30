@@ -14,6 +14,7 @@ interface ChatState {
     setShowInResultsPanel: (value: boolean) => void;
     oaResponse?: OpenAlexWorkResponse;
     setOaResponse: (value: OpenAlexWorkResponse) => void;
+    clearChatBox: () => void;
 }
 
 const useChatStore = create<ChatState>((set, get) => ({
@@ -28,6 +29,7 @@ const useChatStore = create<ChatState>((set, get) => ({
         set({ showInResultsPanel: value });
     },
     setOaResponse: (value) => set({ oaResponse: value }),
+    clearChatBox: () => set({ messages: [] }),
 }));
 
 export default useChatStore;

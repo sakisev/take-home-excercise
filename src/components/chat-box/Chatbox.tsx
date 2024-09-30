@@ -93,7 +93,7 @@ const StyledFab = styled(Fab)(({ theme }) => ({
 }));
 
 export default function Chatbox() {
-    const { toggleChatbox, isChatboxOpen, messages } = useChatStore();
+    const { toggleChatbox, isChatboxOpen, messages, clearChatBox } = useChatStore();
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
     const [userInput, setUserInput] = useState<string | ''>('');
 
@@ -156,7 +156,7 @@ export default function Chatbox() {
                 }}
             >
                 <Stack className={'Chtbx-Title'} direction={'row'}>
-                    <IconButton size={'small'} onClick={() => {}}>
+                    <IconButton size={'small'} onClick={clearChatBox}>
                         <ChevronLeft width={24} height={24} />
                     </IconButton>
                     <Typography variant={'h6'}>Chat</Typography>
